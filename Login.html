@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — AgroAir</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --g900:#0f2318;--g800:#1a3a22;--g700:#245230;--g600:#2d6a3e;
+      --g500:#3d8a52;--g400:#4fa868;--g300:#7fcf94;--g100:#d4f0db;--g50:#eef8f1;
+      --cream:#f5f7f4;--white:#ffffff;
+      --text:#0f2318;--muted:#4a6651;--subtle:#8aab92;
+      --border:#c5deca;--border-light:#dff0e4;
+      --accent:#4af0c4;--accent-deep:#3ccbb1;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'DM Sans',sans-serif;
+      background:var(--cream);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+    header{
+      background:var(--g800);
+      padding:0 6%;
+      height:64px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:2px solid var(--g600);
+    }
+    .logo{
+      font-family:'Syne',sans-serif;
+      font-weight:800;
+      font-size:1.4rem;
+      color:#fff;
+      text-decoration:none;
+      display:flex;align-items:center;gap:10px;
+    }
+    .logo-icon{width:32px;height:32px;background:var(--g600);border-radius:8px;display:flex;align-items:center;justify-content:center}
+    .logo-icon svg{width:18px;height:18px;stroke:var(--g300);fill:none;stroke-width:2}
+    .logo span{color:var(--g300)}
+    .hdr-link{color:var(--g100);font-size:13px;text-decoration:none}
+    .hdr-link:hover{color:var(--g300)}
+
+    main{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:3rem 1.5rem;
+    }
+
+    .login-wrap{
+      width:100%;
+      max-width:460px;
+    }
+
+    .login-card{
+      background:var(--white);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:2.5rem;
+      box-shadow:0 12px 40px rgba(15,35,24,.08);
+    }
+
+    .login-header{text-align:center;margin-bottom:2rem}
+    .login-icon{
+      width:60px;height:60px;
+      background:var(--g50);
+      border:2px solid var(--border);
+      border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 1rem;
+    }
+    .login-icon svg{width:28px;height:28px;stroke:var(--g600);fill:none;stroke-width:1.8}
+    .login-header h1{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--text)}
+    .login-header p{font-size:0.9rem;color:var(--muted);margin-top:0.3rem}
+
+    .field{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1.2rem}
+    label{font-weight:700;font-size:0.8rem;color:var(--text);text-transform:uppercase;letter-spacing:0.05em}
+    input,select{
+      padding:0.8rem 1rem;
+      border:1.5px solid var(--border);
+      border-radius:10px;
+      font-family:inherit;
+      font-size:0.95rem;
+      color:var(--text);
+      background:var(--cream);
+      outline:none;
+      transition:border-color .2s;
+    }
+    input:focus,select:focus{border-color:var(--g500);background:var(--white)}
+
+    #empresaField{display:none}
+
+    .btn-login{
+      width:100%;
+      background:var(--g800);
+      color:#fff;
+      border:none;
+      padding:1rem;
+      border-radius:12px;
+      font-family:'Syne',sans-serif;
+      font-weight:700;
+      font-size:1rem;
+      cursor:pointer;
+      margin-top:0.5rem;
+      transition:background .2s;
+    }
+    .btn-login:hover{background:var(--g600)}
+
+    .msg-error{
+      display:none;
+      background:#fee2e2;
+      border:1px solid #fca5a5;
+      color:#991b1b;
+      padding:0.75rem 1rem;
+      border-radius:10px;
+      font-size:0.85rem;
+      margin-bottom:1rem;
+    }
+    .msg-error.show{display:block}
+
+    .admin-hint{
+      text-align:center;
+      margin-top:1.5rem;
+      padding:1rem;
+      background:var(--g50);
+      border:1px dashed var(--border);
+      border-radius:10px;
+      font-size:0.8rem;
+      color:var(--muted);
+    }
+    .admin-hint strong{color:var(--g700)}
+
+    footer{
+      background:var(--g900);
+      color:#4a6651;
+      text-align:center;
+      padding:1.5rem;
+      font-size:0.78rem;
+    }
+    footer span{color:var(--g300)}
+  </style>
+</head>
+<body>
+  <header>
+    <a href="Index.html" class="logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      Agro<span>Air</span>
+    </a>
+    <a href="Index.html" class="hdr-link">← Voltar ao início</a>
+  </header>
+
+  <main>
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-icon">
+            <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+          </div>
+          <h1>Acessar conta</h1>
+          <p>Entre com seu usuário e senha para continuar</p>
+        </div>
+
+        <div class="msg-error" id="msgErro">Usuário, senha ou empresa inválidos.</div>
+
+        <div class="field">
+          <label>Nome de Usuário</label>
+          <input type="text" id="usuario" placeholder="Ex: joao.silva" autocomplete="username"/>
+        </div>
+
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password"/>
+        </div>
+
+        <div class="field" id="empresaField">
+          <label>Selecionar Empresa</label>
+          <select id="empresaSel">
+            <option value="">— Selecione sua empresa —</option>
+          </select>
+        </div>
+
+        <button class="btn-login" onclick="fazerLogin()">Entrar</button>
+
+        <div class="admin-hint">
+          <strong>Acesso Admin:</strong> usuário <strong>admin</strong> / senha <strong>1010</strong><br/>
+          Admin não precisa selecionar empresa.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>© 2026 <span>AgroAir</span> — Todos os direitos reservados.</footer>
+
+  <script>
+    // Detecta se é admin enquanto digita, para mostrar/ocultar campo de empresa
+    document.getElementById('usuario').addEventListener('input', verificarCampoEmpresa);
+    document.getElementById('senha').addEventListener('input', verificarCampoEmpresa);
+
+    function verificarCampoEmpresa() {
+      const u = document.getElementById('usuario').value.trim().toLowerCase();
+      const empresaField = document.getElementById('empresaField');
+      if(u === 'admin') {
+        empresaField.style.display = 'none';
+      } else {
+        empresaField.style.display = 'flex';
+        carregarEmpresas();
+      }
+    }
+
+    function carregarEmpresas() {
+      const empresas = JSON.parse(localStorage.getItem('empresasAgroAir')) || [];
+      const sel = document.getElementById('empresaSel');
+      const atual = sel.value;
+      sel.innerHTML = '<option value="">— Selecione sua empresa —</option>';
+      empresas.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.id;
+        opt.textContent = e.nome;
+        sel.appendChild(opt);
+      });
+      if(atual) sel.value = atual;
+    }
+
+    function fazerLogin() {
+      const usuario = document.getElementById('usuario').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+      const empresaSel = document.getElementById('empresaSel').value;
+      const erro = document.getElementById('msgErro');
+
+      erro.classList.remove('show');
+
+      if(!usuario || !senha) { erro.textContent = 'Preencha usuário e senha.'; erro.classList.add('show'); return; }
+
+      // LOGIN ADMIN
+      if(usuario.toLowerCase() === 'admin' && senha === '1010') {
+        sessionStorage.setItem('agroairUser', JSON.stringify({ usuario: 'admin', role: 'admin', nome: 'Administrador' }));
+        window.location.href = 'Painel_admin.html';
+        return;
+      }
+
+      // LOGIN USUÁRIO COMUM
+      const usuarios = JSON.parse(localStorage.getItem('usuariosAgroAir')) || [];
+      const user = usuarios.find(u => u.usuario === usuario && u.senha === senha);
+
+      if(!user) { erro.textContent = 'Usuário ou senha inválidos.'; erro.classList.add('show'); return; }
+      if(!empresaSel) { erro.textContent = 'Selecione a empresa para continuar.'; erro.classList.add('show'); return; }
+      if(user.empresaId && user.empresaId !== empresaSel) { erro.textContent = 'Empresa não corresponde ao seu cadastro.'; erro.classList.add('show'); return; }
+
+      sessionStorage.setItem('agroairUser', JSON.stringify({ ...user, empresaId: empresaSel }));
+      window.location.href = 'Painel_admin.html';
+    }
+
+    // Enter para login
+    document.addEventListener('keydown', e => { if(e.key === 'Enter') fazerLogin(); });
+  </script>
+</body>
+</html>

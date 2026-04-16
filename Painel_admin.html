@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel Administrativo — AgroAir</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --g900:#0f2318;--g800:#1a3a22;--g700:#245230;--g600:#2d6a3e;
+      --g500:#3d8a52;--g400:#4fa868;--g300:#7fcf94;--g100:#d4f0db;--g50:#eef8f1;
+      --brand-black:#0a0d16;--accent:#4af0c4;--accent-green:#25d366;
+      --bg:#f1f4f1;--white:#ffffff;--border:#e0e6e0;
+      --sidebar-width:260px;--transition:all 0.25s ease;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);display:flex;min-height:100vh}
+
+    /* ── SIDEBAR ── */
+    .sidebar{
+      width:var(--sidebar-width);background:var(--brand-black);
+      color:white;height:100vh;position:fixed;
+      display:flex;flex-direction:column;z-index:1000;
+      overflow-y:auto;
+    }
+    .sidebar-header{
+      padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-logo{
+      font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;
+      display:flex;align-items:center;gap:10px;
+    }
+    .sidebar-logo-icon{
+      width:34px;height:34px;background:var(--g600);
+      border-radius:8px;display:flex;align-items:center;justify-content:center;
+    }
+    .sidebar-logo-icon svg{width:18px;height:18px;stroke:var(--g300);fill:none;stroke-width:2}
+    .sidebar-logo span{color:var(--accent)}
+    .sidebar-user{
+      margin-top:0.8rem;padding:0.7rem 0.8rem;
+      background:rgba(255,255,255,0.05);border-radius:8px;
+      font-size:0.78rem;color:#adb5bd;
+    }
+    .sidebar-user strong{display:block;color:#fff;font-size:0.85rem}
+
+    .nav-section-title{
+      padding:1.2rem 1.2rem 0.4rem;
+      font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;
+      color:#4a5568;font-weight:700;
+    }
+    .nav-menu{flex:1;padding:0.5rem 0}
+    .nav-item{
+      padding:0.7rem 1.2rem;display:flex;align-items:center;gap:10px;
+      color:#adb5bd;text-decoration:none;cursor:pointer;
+      transition:var(--transition);font-weight:500;font-size:0.88rem;
+      border-left:3px solid transparent;
+    }
+    .nav-item:hover{color:white;background:rgba(255,255,255,0.04)}
+    .nav-item.active{border-left-color:var(--accent);color:var(--accent);background:rgba(74,240,196,0.05)}
+    .nav-item svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+    .nav-item .badge{
+      margin-left:auto;background:var(--g600);color:#fff;
+      font-size:0.65rem;padding:2px 7px;border-radius:10px;font-weight:700;
+    }
+    .submenu{background:rgba(0,0,0,0.15);display:none}
+    .submenu.show{display:block}
+    .submenu .nav-item{padding-left:2.2rem;font-size:0.83rem}
+
+    .logout-btn{
+      color:#ef4444;text-decoration:none;
+      display:flex;align-items:center;gap:8px;
+      padding:1.2rem 1.2rem;font-weight:600;font-size:0.85rem;
+      border-top:1px solid rgba(255,255,255,0.06);
+      transition:var(--transition);
+    }
+    .logout-btn:hover{color:#ff6b6b;background:rgba(239,68,68,0.05)}
+    .logout-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+
+    /* ── MAIN ── */
+    .main-content{margin-left:var(--sidebar-width);flex:1;padding:2rem}
+    .content-section{display:none;animation:fadeIn .3s ease}
+    .content-section.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    .page-header{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:1.5rem;padding-bottom:1rem;
+      border-bottom:1px solid var(--border);
+    }
+    .page-header h2{font-family:'Syne',sans-serif;font-size:1.6rem;color:#111}
+    .page-header p{font-size:0.85rem;color:#666;margin-top:0.2rem}
+
+    /* ── CARDS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem;margin-bottom:1.5rem}
+    .stat-card{
+      background:white;padding:1.3rem 1.5rem;border-radius:14px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.04);border:1px solid var(--border);
+    }
+    .stat-label{color:#888;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+    .stat-value{font-size:2rem;font-weight:800;color:var(--g800);font-family:'Syne',sans-serif}
+    .stat-value .online{color:var(--accent-green)}
+    .stat-footer{font-size:0.75rem;color:#aaa;margin-top:0.4rem}
+    .stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem}
+    .stat-icon svg{width:20px;height:20px;fill:none;stroke-width:2;stroke:currentColor}
+    .si-green{background:var(--g50);color:var(--g600)}
+    .si-blue{background:#eff6ff;color:#2563eb}
+    .si-orange{background:#fff7ed;color:#c2410c}
+    .si-purple{background:#f5f3ff;color:#7c3aed}
+
+    /* ── FORM CARD ── */
+    .card{background:white;padding:1.8rem;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,0.04);border:1px solid var(--border);margin-bottom:1.5rem}
+    .card-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1.2rem;color:#111;display:flex;align-items:center;gap:8px}
+    .card-title svg{width:18px;height:18px;stroke:var(--g600);fill:none;stroke-width:2}
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+    .form-grid.cols2{grid-template-columns:repeat(2,1fr)}
+    .form-grid.cols3{grid-template-columns:repeat(3,1fr)}
+    .field{display:flex;flex-direction:column;gap:0.35rem}
+    .field.span2{grid-column:span 2}
+    label{font-weight:700;font-size:0.75rem;color:#444;text-transform:uppercase;letter-spacing:0.04em}
+    input,select,textarea{
+      padding:0.7rem 0.9rem;border:1.5px solid #e0e6e0;
+      border-radius:9px;font-family:inherit;font-size:0.9rem;color:#222;
+      background:#f9faf9;outline:none;transition:border-color .2s,background .2s;
+    }
+    input:focus,select:focus,textarea:focus{border-color:var(--g500);background:white}
+    textarea{resize:vertical;min-height:80px}
+    .form-actions{display:flex;gap:0.8rem;margin-top:1.2rem}
+    .btn-primary{
+      background:var(--g800);color:white;border:none;
+      padding:0.8rem 1.8rem;border-radius:9px;font-weight:700;
+      cursor:pointer;font-size:0.9rem;transition:background .2s;
+      display:flex;align-items:center;gap:6px;
+    }
+    .btn-primary:hover{background:var(--g600)}
+    .btn-primary svg{width:15px;height:15px;stroke:white;fill:none;stroke-width:2.5}
+    .btn-secondary{
+      background:white;color:#444;border:1.5px solid var(--border);
+      padding:0.8rem 1.5rem;border-radius:9px;font-weight:600;
+      cursor:pointer;font-size:0.9rem;transition:all .2s;
+    }
+    .btn-secondary:hover{border-color:#999;color:#111}
+
+    /* PRODUCT SEARCH FILTER */
+    .filter-bar{
+      display:flex;gap:0.8rem;margin-bottom:1rem;flex-wrap:wrap;
+    }
+    .filter-bar input{flex:1;min-width:160px;padding:0.6rem 0.9rem;font-size:0.85rem}
+    .filter-bar select{padding:0.6rem 0.9rem;font-size:0.85rem}
+    .filter-bar .btn-search{
+      background:var(--g800);color:#fff;border:none;
+      padding:0.6rem 1.2rem;border-radius:9px;cursor:pointer;font-weight:600;font-size:0.85rem;
+    }
+
+    /* ── TABLE ── */
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:0.9rem 1rem;text-align:left;border-bottom:1px solid #f0f0f0;font-size:0.85rem}
+    th{color:#888;font-size:0.72rem;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;background:#fafafa}
+    tr:hover td{background:#f9faf9}
+    .prod-img{width:42px;height:42px;border-radius:8px;object-fit:cover;background:#f0f5f0;border:1px solid var(--border)}
+    .badge-status{
+      font-size:0.72rem;font-weight:700;padding:3px 9px;
+      border-radius:20px;display:inline-block;
+    }
+    .badge-green{background:var(--g50);color:var(--g600)}
+    .badge-yellow{background:#fef3c7;color:#92400e}
+    .badge-red{background:#fee2e2;color:#991b1b}
+    .badge-blue{background:#eff6ff;color:#1d4ed8}
+    .badge-purple{background:#f5f3ff;color:#6d28d9}
+    .btn-icon{background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;transition:.15s}
+    .btn-icon:hover{background:#f0f0f0}
+    .btn-icon svg{width:15px;height:15px;stroke:#666;fill:none;stroke-width:2;display:block}
+    .btn-del svg{stroke:#ef4444}
+    .empty-state{text-align:center;padding:3rem;color:#aaa;font-size:0.9rem}
+    .empty-state svg{width:40px;height:40px;stroke:#ddd;fill:none;stroke-width:1.5;margin-bottom:0.8rem}
+
+    /* ── PEDIDOS ── */
+    .pedido-card{
+      background:white;border:1px solid var(--border);border-radius:12px;
+      padding:1.2rem 1.5rem;margin-bottom:0.8rem;
+      display:flex;align-items:center;justify-content:space-between;gap:1rem;
+      transition:.2s;
+    }
+    .pedido-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.06)}
+    .pedido-info h4{font-size:0.95rem;font-weight:700;color:#111;margin-bottom:0.2rem}
+    .pedido-info p{font-size:0.8rem;color:#888}
+    .pedido-meta{text-align:right}
+    .pedido-meta .preco{font-size:1.1rem;font-weight:800;color:var(--g800);font-family:'Syne',sans-serif}
+    .pedido-meta .data{font-size:0.75rem;color:#aaa;margin-top:0.2rem}
+    .pedido-actions{display:flex;gap:0.5rem;align-items:center}
+    .select-status{padding:0.4rem 0.7rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;background:white}
+    
+    /* ── DASHBOARD CHARTS ── */
+    .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:1.2rem;margin-top:1.2rem}
+    .chart-card{background:white;padding:1.5rem;border-radius:14px;border:1px solid var(--border)}
+    .chart-title{font-weight:700;font-size:0.9rem;color:#111;margin-bottom:1rem}
+    .bar-row{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;font-size:0.82rem}
+    .bar-label{width:110px;color:#555;flex-shrink:0;text-align:right}
+    .bar-track{flex:1;background:#f0f4f0;border-radius:20px;height:10px;overflow:hidden}
+    .bar-fill{height:10px;border-radius:20px;background:linear-gradient(90deg,var(--g600),var(--g300));transition:width .8s ease}
+    .bar-val{width:50px;font-weight:700;color:var(--g700);text-align:right}
+    .activity-list{display:flex;flex-direction:column;gap:0.8rem}
+    .activity-item{display:flex;align-items:flex-start;gap:0.8rem;font-size:0.82rem}
+    .act-dot{width:8px;height:8px;border-radius:50%;background:var(--g400);flex-shrink:0;margin-top:4px}
+    .act-dot.blue{background:#60a5fa}
+    .act-dot.orange{background:#fb923c}
+    .act-text{color:#555;line-height:1.4}
+    .act-time{color:#aaa;font-size:0.75rem;margin-top:2px}
+
+    @media(max-width:900px){
+      .sidebar{width:220px}
+      .main-content{margin-left:220px}
+      .dash-grid{grid-template-columns:1fr}
+      .form-grid.cols3{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:700px){
+      .sidebar{display:none}
+      .main-content{margin-left:0}
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      Agro<span>Air</span>
+    </div>
+    <div class="sidebar-user">
+      <strong id="sidebarNome">Administrador</strong>
+      <span id="sidebarRole">Admin · Acesso total</span>
+    </div>
+  </div>
+
+  <nav class="nav-menu">
+    <div class="nav-section-title">Geral</div>
+    <a onclick="showSection('dashboard')" id="nav-dashboard" class="nav-item active">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a onclick="showSection('pedidos')" id="nav-pedidos" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Pedidos
+      <span class="badge" id="badgePedidos">0</span>
+    </a>
+
+    <div class="nav-section-title">Cadastros</div>
+    <div class="nav-item" onclick="toggleSubmenu()">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Cadastros
+      <svg style="margin-left:auto;width:12px;height:12px" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="submenu show" id="submenuCadastro">
+      <a onclick="showSection('produtos')" id="nav-produtos" class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+        Produtos
+      </a>
+      <a onclick="showSection('clientes')" id="nav-clientes" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Clientes
+      </a>
+      <a onclick="showSection('empresa')" id="nav-empresa" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Empresa
+      </a>
+      <a onclick="showSection('usuarios')" id="nav-usuarios" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Usuários
+      </a>
+    </div>
+
+    <div class="nav-section-title">Loja</div>
+    <a href="agroair_verde.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Ver Catálogo
+    </a>
+  </nav>
+
+  <a href="Login.html" class="logout-btn" onclick="sessionStorage.removeItem('agroairUser')">
+    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Sair do Sistema
+  </a>
+</aside>
+
+<main class="main-content">
+
+  <!-- ── DASHBOARD ── -->
+  <section id="section-dashboard" class="content-section active">
+    <div class="page-header">
+      <div><h2>Dashboard</h2><p>Visão geral do sistema</p></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon si-green"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        <div class="stat-label">Usuários Cadastrados</div>
+        <div class="stat-value" id="countUsuarios">0</div>
+        <div class="stat-footer">Online agora: <span class="online" id="usersOnline">1</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div>
+        <div class="stat-label">Produtos Cadastrados</div>
+        <div class="stat-value" id="countProdutos">0</div>
+        <div class="stat-footer">Em estoque ativo</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-orange"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+        <div class="stat-label">Pedidos Totais</div>
+        <div class="stat-value" id="countPedidos">0</div>
+        <div class="stat-footer">Registrados no sistema</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-purple"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+        <div class="stat-label">Empresas</div>
+        <div class="stat-value" id="countEmpresas">0</div>
+        <div class="stat-footer">Cadastradas no sistema</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="chart-card">
+        <div class="chart-title">Produtos por Categoria</div>
+        <div id="chartCategorias">
+          <div class="empty-state"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><p>Nenhum produto cadastrado ainda.</p></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Atividade Recente</div>
+        <div id="activityList" class="activity-list">
+          <div class="activity-item">
+            <div class="act-dot"></div>
+            <div><div class="act-text">Sistema iniciado</div><div class="act-time">Agora</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PEDIDOS ── -->
+  <section id="section-pedidos" class="content-section">
+    <div class="page-header">
+      <div><h2>Pedidos</h2><p>Gerencie e acompanhe os pedidos recebidos</p></div>
+      <button class="btn-primary" onclick="showSection('novoPedido')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo Pedido
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="filter-bar">
+        <input type="text" placeholder="Buscar por cliente ou produto..." id="filtPedido" oninput="filtrarPedidos()"/>
+        <select id="filtStatusPedido" onchange="filtrarPedidos()">
+          <option value="">Todos os status</option>
+          <option>Pendente</option>
+          <option>Em andamento</option>
+          <option>Enviado</option>
+          <option>Entregue</option>
+          <option>Cancelado</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="listaPedidos"></div>
+  </section>
+
+  <!-- ── NOVO PEDIDO ── -->
+  <section id="section-novoPedido" class="content-section">
+    <div class="page-header">
+      <div><h2>Novo Pedido</h2><p>Registre um pedido manualmente</p></div>
+      <button class="btn-secondary" onclick="showSection('pedidos')">← Voltar</button>
+    </div>
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg> Dados do Pedido</div>
+      <div class="form-grid cols3">
+        <div class="field">
+          <label>Nome do Cliente</label>
+          <input type="text" id="ped_cliente" placeholder="Ex: João da Silva"/>
+        </div>
+        <div class="field">
+          <label>Telefone / WhatsApp</label>
+          <input type="text" id="ped_tel" placeholder="(34) 99999-9999"/>
+        </div>
+        <div class="field">
+          <label>E-mail</label>
+          <input type="email" id="ped_email" placeholder="email@exemplo.com"/>
+        </div>
+        <div class="field">
+          <label>Produto / Peça</label>
+          <input type="text" id="ped_produto" placeholder="Ex: Compressor Sanden 5H14"/>
+        </div>
+        <div class="field">
+          <label>Quantidade</label>
+          <input type="number" id="ped_qtd" placeholder="1" min="1" value="1"/>
+        </div>
+        <div class="field">
+          <label>Valor Total (R$)</label>
+          <input type="number" id="ped_valor" placeholder="0.00"/>
+        </div>
+        <div class="field">
+          <label>Forma de Pagamento</label>
+          <select id="ped_pagamento">
+            <option>PIX</option>
+            <option>Cartão de Crédito</option>
+            <option>Boleto</option>
+            <option>Transferência</option>
+            <option>Dinheiro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="ped_status">
+            <option>Pendente</option>
+            <option>Em andamento</option>
+            <option>Enviado</option>
+            <option>Entregue</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Forma de Entrega</label>
+          <select id="ped_entrega">
+            <option>Correios</option>
+            <option>Transportadora</option>
+            <option>Retirada na loja</option>
+            <option>Motoboy</option>
+          </select>
+        </div>
+        <div class="field span2">
+          <label>Observações</label>
+          <textarea id="ped_obs" placeholder="Informações adicionais sobre o pedido..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="salvarPedido()">
+          <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Salvar Pedido
+        </button>
+        <button class="btn-secondary" onclick="showSection('pedidos')">Cancelar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRODUTOS ── -->
+  <section id="section-produtos" class="content-section">
+    <div class="page-header">
+      <div><h2>Produtos</h2><p>Cadastre e gerencie o catálogo de peças</p></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Novo Produto</div>
+      <div class="form-grid cols3">
+        <div class="field">
+          <label>Nome da Peça</label>
+          <input type="text" id="prod_nome" placeholder="Ex: Compressor 10P15"/>
+        </div>
+        <div class="field">
+          <label>Código de Referência</label>
+          <input type="text" id="prod_codigo" placeholder="AA-001"/>
+        </div>
+        <div class="field">
+          <label>Preço de Venda (R$)</label>
+          <input type="number" id="prod_preco" placeholder="0.00"/>
+        </div>
+        <div class="field">
+          <label>Categoria</label>
+          <select id="prod_categoria">
+            <option>Compressores</option>
+            <option>Condensadores</option>
+            <option>Evaporadores</option>
+            <option>Válvulas</option>
+            <option>Filtros</option>
+            <option>Mangueiras</option>
+            <option>Freios</option>
+            <option>Motor</option>
+            <option>Suspensão</option>
+            <option>Elétrica</option>
+            <option>Agrícola</option>
+            <option>Automotivo</option>
+            <option>Pesados</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Estado do Estoque</label>
+          <select id="prod_estoque">
+            <option>Em Estoque</option>
+            <option>Sob Encomenda</option>
+            <option>Esgotado</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Foto do Produto</label>
+          <input type="file" id="prod_foto" accept="image/*"/>
+        </div>
+        <div class="field span2">
+          <label>Descrição</label>
+          <textarea id="prod_desc" placeholder="Descreva aplicações, compatibilidade, características..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="salvarProduto()">
+          <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Salvar Produto
+        </button>
+        <button class="btn-secondary" onclick="limparForm('prod')">Limpar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Busca Rápida de Produtos</div>
+      <div class="filter-bar">
+        <input type="text" id="filtProd" placeholder="Buscar por nome ou código..." oninput="filtrarProdutos()"/>
+        <select id="filtCategoriaProd" onchange="filtrarProdutos()">
+          <option value="">Todas as categorias</option>
+          <option>Compressores</option><option>Condensadores</option><option>Evaporadores</option>
+          <option>Válvulas</option><option>Filtros</option><option>Mangueiras</option>
+          <option>Freios</option><option>Motor</option><option>Suspensão</option>
+          <option>Elétrica</option><option>Agrícola</option><option>Automotivo</option><option>Pesados</option>
+        </select>
+        <select id="filtEstoqueProd" onchange="filtrarProdutos()">
+          <option value="">Todos os estoques</option>
+          <option>Em Estoque</option><option>Sob Encomenda</option><option>Esgotado</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Foto</th><th>Nome</th><th>Código</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr></thead>
+          <tbody id="tabelaProdutos"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CLIENTES ── -->
+  <section id="section-clientes" class="content-section">
+    <div class="page-header">
+      <div><h2>Clientes</h2><p>Gerencie sua base de clientes e leads</p></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Cadastrar Cliente</div>
+      <div class="form-grid cols3">
+        <div class="field">
+          <label>Nome Completo</label>
+          <input type="text" id="cli_nome" placeholder="Ex: João da Silva"/>
+        </div>
+        <div class="field">
+          <label>E-mail</label>
+          <input type="email" id="cli_email" placeholder="joao@email.com"/>
+        </div>
+        <div class="field">
+          <label>Telefone / WhatsApp</label>
+          <input type="text" id="cli_tel" placeholder="(34) 99999-9999"/>
+        </div>
+        <div class="field">
+          <label>CPF / CNPJ</label>
+          <input type="text" id="cli_doc" placeholder="000.000.000-00"/>
+        </div>
+        <div class="field">
+          <label>Cidade</label>
+          <input type="text" id="cli_cidade" placeholder="Ex: Uberlândia"/>
+        </div>
+        <div class="field">
+          <label>Estado (UF)</label>
+          <select id="cli_uf">
+            <option value="">Selecione</option>
+            <option>MG</option><option>SP</option><option>GO</option><option>MS</option>
+            <option>RJ</option><option>RS</option><option>PR</option><option>BA</option>
+            <option>MT</option><option>TO</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tipo de Cliente</label>
+          <select id="cli_tipo">
+            <option>Pessoa Física</option>
+            <option>Pessoa Jurídica</option>
+            <option>Distribuidor</option>
+            <option>Oficina</option>
+            <option>Lead / Prospect</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Origem do Contato</label>
+          <select id="cli_origem">
+            <option>WhatsApp</option>
+            <option>Site</option>
+            <option>Indicação</option>
+            <option>Instagram</option>
+            <option>Presencial</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Empresa / Fazenda</label>
+          <input type="text" id="cli_empresa" placeholder="Nome da empresa ou fazenda"/>
+        </div>
+        <div class="field span2">
+          <label>Observações</label>
+          <textarea id="cli_obs" placeholder="Interesses, produtos consultados, histórico..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="salvarCliente()">
+          <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Salvar Cliente
+        </button>
+        <button class="btn-secondary" onclick="limparForm('cli')">Limpar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Lista de Clientes</div>
+      <div class="filter-bar">
+        <input type="text" id="filtCliente" placeholder="Buscar por nome, e-mail ou telefone..." oninput="filtrarClientes()"/>
+        <select id="filtTipoCliente" onchange="filtrarClientes()">
+          <option value="">Todos os tipos</option>
+          <option>Pessoa Física</option><option>Pessoa Jurídica</option>
+          <option>Distribuidor</option><option>Oficina</option><option>Lead / Prospect</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Cidade/UF</th><th>Tipo</th><th>Origem</th><th>Ações</th></tr></thead>
+          <tbody id="tabelaClientes"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── EMPRESA ── -->
+  <section id="section-empresa" class="content-section">
+    <div class="page-header">
+      <div><h2>Empresas</h2><p>Cadastre as empresas do sistema</p></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> Cadastrar Empresa</div>
+      <div class="form-grid cols3">
+        <div class="field">
+          <label>Razão Social</label>
+          <input type="text" id="emp_nome" placeholder="Ex: AgroAir Comércio Ltda"/>
+        </div>
+        <div class="field">
+          <label>Nome Fantasia</label>
+          <input type="text" id="emp_fantasia" placeholder="Ex: AgroAir"/>
+        </div>
+        <div class="field">
+          <label>CNPJ</label>
+          <input type="text" id="emp_cnpj" placeholder="00.000.000/0001-00"/>
+        </div>
+        <div class="field">
+          <label>Telefone</label>
+          <input type="text" id="emp_tel" placeholder="(34) 3333-3333"/>
+        </div>
+        <div class="field">
+          <label>E-mail</label>
+          <input type="email" id="emp_email" placeholder="contato@empresa.com"/>
+        </div>
+        <div class="field">
+          <label>Segmento</label>
+          <select id="emp_segmento">
+            <option>Climatização Agrícola</option>
+            <option>Climatização Automotiva</option>
+            <option>Distribuidor</option>
+            <option>Oficina</option>
+            <option>Revendedor</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Cidade</label>
+          <input type="text" id="emp_cidade" placeholder="Ex: Uberlândia"/>
+        </div>
+        <div class="field">
+          <label>Estado (UF)</label>
+          <select id="emp_uf">
+            <option value="">Selecione</option>
+            <option>MG</option><option>SP</option><option>GO</option><option>MS</option>
+            <option>RJ</option><option>RS</option><option>PR</option><option>BA</option>
+            <option>MT</option><option>TO</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="emp_status">
+            <option>Ativa</option>
+            <option>Inativa</option>
+            <option>Suspensa</option>
+          </select>
+        </div>
+        <div class="field span2">
+          <label>Endereço Completo</label>
+          <input type="text" id="emp_endereco" placeholder="Rua, número, bairro, CEP"/>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="salvarEmpresa()">
+          <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Salvar Empresa
+        </button>
+        <button class="btn-secondary" onclick="limparForm('emp')">Limpar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> Empresas Cadastradas</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Razão Social</th><th>Fantasia</th><th>CNPJ</th><th>Cidade/UF</th><th>Segmento</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="tabelaEmpresas"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── USUÁRIOS ── -->
+  <section id="section-usuarios" class="content-section">
+    <div class="page-header">
+      <div><h2>Usuários</h2><p>Gerencie os acessos ao sistema</p></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Criar Usuário</div>
+      <div class="form-grid cols3">
+        <div class="field">
+          <label>Nome Completo</label>
+          <input type="text" id="usr_nome" placeholder="Ex: João da Silva"/>
+        </div>
+        <div class="field">
+          <label>Nome de Usuário (login)</label>
+          <input type="text" id="usr_usuario" placeholder="Ex: joao.silva"/>
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" id="usr_senha" placeholder="Mínimo 4 caracteres"/>
+        </div>
+        <div class="field">
+          <label>E-mail</label>
+          <input type="email" id="usr_email" placeholder="joao@email.com"/>
+        </div>
+        <div class="field">
+          <label>Perfil de Acesso</label>
+          <select id="usr_role">
+            <option value="vendedor">Vendedor</option>
+            <option value="estoque">Estoque</option>
+            <option value="financeiro">Financeiro</option>
+            <option value="admin_empresa">Admin Empresa</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Empresa Vinculada</label>
+          <select id="usr_empresa">
+            <option value="">Selecione a empresa</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="salvarUsuario()">
+          <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Criar Usuário
+        </button>
+        <button class="btn-secondary" onclick="limparForm('usr')">Limpar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Usuários do Sistema</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nome</th><th>Usuário</th><th>E-mail</th><th>Perfil</th><th>Empresa</th><th>Ações</th></tr></thead>
+          <tbody id="tabelaUsuarios"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// ESTADO DO SISTEMA
+// ═══════════════════════════════════════════════════════════════
+let produtos  = JSON.parse(localStorage.getItem('produtosAgroAir'))  || [];
+let clientes  = JSON.parse(localStorage.getItem('clientesAgroAir'))  || [];
+let empresas  = JSON.parse(localStorage.getItem('empresasAgroAir'))  || [];
+let usuarios  = JSON.parse(localStorage.getItem('usuariosAgroAir'))  || [];
+let pedidos   = JSON.parse(localStorage.getItem('pedidosAgroAir'))   || [];
+
+// ═══════════════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════════════════════
+function showSection(id) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sec = document.getElementById('section-' + id);
+  if(sec) sec.classList.add('active');
+  const nav = document.getElementById('nav-' + id);
+  if(nav) nav.classList.add('active');
+  if(id === 'dashboard') atualizarDashboard();
+  if(id === 'pedidos') renderPedidos();
+  if(id === 'produtos') { renderTabela('Produtos'); }
+  if(id === 'clientes') renderTabela('Clientes');
+  if(id === 'empresa') renderTabela('Empresas');
+  if(id === 'usuarios') { carregarEmpresasSelect(); renderTabela('Usuarios'); }
+}
+function toggleSubmenu() {
+  document.getElementById('submenuCadastro').classList.toggle('show');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SESSÃO
+// ═══════════════════════════════════════════════════════════════
+function initSession() {
+  const user = JSON.parse(sessionStorage.getItem('agroairUser') || '{}');
+  if(user.nome) document.getElementById('sidebarNome').textContent = user.nome;
+  if(user.role) {
+    const roleMap = { admin: 'Admin · Acesso total', vendedor: 'Vendedor', estoque: 'Estoque', financeiro: 'Financeiro', admin_empresa: 'Admin Empresa' };
+    document.getElementById('sidebarRole').textContent = roleMap[user.role] || user.role;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function atualizarDashboard() {
+  document.getElementById('countUsuarios').textContent = usuarios.length;
+  document.getElementById('countProdutos').textContent = produtos.length;
+  document.getElementById('countPedidos').textContent  = pedidos.length;
+  document.getElementById('countEmpresas').textContent = empresas.length;
+  document.getElementById('badgePedidos').textContent  = pedidos.filter(p => p.status === 'Pendente').length;
+  const online = Math.min(usuarios.length + 1, Math.floor(Math.random() * 3) + 1);
+  document.getElementById('usersOnline').textContent = online;
+  renderChartCategorias();
+}
+
+function renderChartCategorias() {
+  const div = document.getElementById('chartCategorias');
+  if(!produtos.length) {
+    div.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><p>Nenhum produto cadastrado ainda.</p></div>';
+    return;
+  }
+  const cats = {};
+  produtos.forEach(p => { cats[p.categoria] = (cats[p.categoria]||0)+1; });
+  const max = Math.max(...Object.values(cats));
+  div.innerHTML = Object.entries(cats).map(([cat, val]) => `
+    <div class="bar-row">
+      <div class="bar-label">${cat}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(val/max*100).toFixed(0)}%"></div></div>
+      <div class="bar-val">${val}</div>
+    </div>`).join('');
+}
+
+function addActivity(txt, type='') {
+  const list = document.getElementById('activityList');
+  const time = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  const dot = type === 'blue' ? 'blue' : type === 'orange' ? 'orange' : '';
+  list.insertAdjacentHTML('afterbegin', `
+    <div class="activity-item">
+      <div class="act-dot ${dot}"></div>
+      <div><div class="act-text">${txt}</div><div class="act-time">${time}</div></div>
+    </div>`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PEDIDOS
+// ═══════════════════════════════════════════════════════════════
+function salvarPedido() {
+  const cliente = document.getElementById('ped_cliente').value.trim();
+  const produto = document.getElementById('ped_produto').value.trim();
+  const valor   = document.getElementById('ped_valor').value;
+  if(!cliente || !produto) return alert('Informe o cliente e o produto.');
+  const pedido = {
+    id: Date.now(),
+    cliente,
+    tel:      document.getElementById('ped_tel').value,
+    email:    document.getElementById('ped_email').value,
+    produto,
+    qtd:      document.getElementById('ped_qtd').value,
+    valor:    parseFloat(valor)||0,
+    pagamento:document.getElementById('ped_pagamento').value,
+    status:   document.getElementById('ped_status').value,
+    entrega:  document.getElementById('ped_entrega').value,
+    obs:      document.getElementById('ped_obs').value,
+    data:     new Date().toLocaleDateString('pt-BR')
+  };
+  pedidos.unshift(pedido);
+  localStorage.setItem('pedidosAgroAir', JSON.stringify(pedidos));
+  addActivity(`Pedido de ${cliente} — R$ ${pedido.valor.toFixed(2)}`, 'blue');
+  alert('Pedido registrado com sucesso!');
+  ['ped_cliente','ped_tel','ped_email','ped_produto','ped_valor','ped_obs'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('ped_qtd').value=1;
+  showSection('pedidos');
+}
+
+function renderPedidos(lista) {
+  const arr = lista || pedidos;
+  const div = document.getElementById('listaPedidos');
+  if(!arr.length) {
+    div.innerHTML = '<div class="card"><div class="empty-state"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg><p>Nenhum pedido registrado ainda.</p></div></div>';
+    return;
+  }
+  const statusClass = { 'Pendente':'badge-yellow','Em andamento':'badge-blue','Enviado':'badge-purple','Entregue':'badge-green','Cancelado':'badge-red' };
+  div.innerHTML = arr.map((p,i) => `
+    <div class="pedido-card">
+      <div class="pedido-info">
+        <h4>${p.cliente}</h4>
+        <p>${p.produto} · Qtd: ${p.qtd||1} · ${p.pagamento||'—'} · ${p.entrega||'—'}</p>
+        ${p.obs ? `<p style="color:#aaa;font-size:0.78rem;margin-top:2px">${p.obs}</p>` : ''}
+      </div>
+      <div class="pedido-actions">
+        <select class="select-status" onchange="atualizarStatusPedido(${i},this.value)">
+          ${['Pendente','Em andamento','Enviado','Entregue','Cancelado'].map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <span class="badge-status ${statusClass[p.status]||''}">${p.status}</span>
+        <button class="btn-icon btn-del" onclick="deletarPedido(${i})" title="Remover"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+      </div>
+      <div class="pedido-meta">
+        <div class="preco">R$ ${p.valor.toFixed(2)}</div>
+        <div class="data">${p.data||'—'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function atualizarStatusPedido(i, status) {
+  pedidos[i].status = status;
+  localStorage.setItem('pedidosAgroAir', JSON.stringify(pedidos));
+  renderPedidos();
+}
+
+function deletarPedido(i) {
+  if(confirm('Remover este pedido?')) {
+    pedidos.splice(i,1);
+    localStorage.setItem('pedidosAgroAir', JSON.stringify(pedidos));
+    renderPedidos();
+    atualizarDashboard();
+  }
+}
+
+function filtrarPedidos() {
+  const q = document.getElementById('filtPedido').value.toLowerCase();
+  const s = document.getElementById('filtStatusPedido').value;
+  const r = pedidos.filter(p => {
+    const match = p.cliente.toLowerCase().includes(q) || p.produto.toLowerCase().includes(q);
+    const statusOk = !s || p.status === s;
+    return match && statusOk;
+  });
+  renderPedidos(r);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PRODUTOS
+// ═══════════════════════════════════════════════════════════════
+async function salvarProduto() {
+  const nome = document.getElementById('prod_nome').value.trim();
+  const codigo = document.getElementById('prod_codigo').value.trim();
+  const preco = document.getElementById('prod_preco').value;
+  if(!nome || !codigo || !preco) return alert('Preencha nome, código e preço.');
+  const fotoInput = document.getElementById('prod_foto');
+  let foto = '';
+  if(fotoInput.files[0]) foto = await toBase64(fotoInput.files[0]);
+  const prod = {
+    id: Date.now(), nome, codigo,
+    preco: parseFloat(preco),
+    categoria: document.getElementById('prod_categoria').value,
+    estoque:   document.getElementById('prod_estoque').value,
+    desc:      document.getElementById('prod_desc').value,
+    foto
+  };
+  produtos.unshift(prod);
+  localStorage.setItem('produtosAgroAir', JSON.stringify(produtos));
+  renderTabela('Produtos');
+  addActivity(`Produto "${nome}" cadastrado`);
+  alert('Produto salvo com sucesso!');
+  limparForm('prod');
+}
+
+function renderTabela(tipo) {
+  if(tipo==='Produtos') {
+    const tbody = document.getElementById('tabelaProdutos');
+    if(!tbody) return;
+    if(!produtos.length) { tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg><p>Nenhum produto cadastrado.</p></div></td></tr>`; return; }
+    tbody.innerHTML = produtos.map((p,i) => {
+      const ec = p.estoque==='Em Estoque'?'badge-green':p.estoque==='Esgotado'?'badge-red':'badge-yellow';
+      return `<tr>
+        <td><img src="${p.foto||'https://placehold.co/42x42/eef8f1/2d6a3e?text=✓'}" class="prod-img"/></td>
+        <td><strong>${p.nome}</strong><div style="font-size:0.78rem;color:#aaa">${p.desc?p.desc.substring(0,40)+'...':''}</div></td>
+        <td style="font-family:monospace;font-size:0.8rem">${p.codigo}</td>
+        <td><span class="badge-status badge-blue">${p.categoria}</span></td>
+        <td style="font-weight:700;color:var(--g800)">R$ ${p.preco.toFixed(2)}</td>
+        <td><span class="badge-status ${ec}">${p.estoque}</span></td>
+        <td><button class="btn-icon btn-del" onclick="deletarItem('produtos',${i})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></td>
+      </tr>`;
+    }).join('');
+  }
+  if(tipo==='Clientes') {
+    const tbody = document.getElementById('tabelaClientes');
+    if(!tbody) return;
+    if(!clientes.length) { tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Nenhum cliente cadastrado.</p></div></td></tr>`; return; }
+    tbody.innerHTML = clientes.map((c,i) => `<tr>
+      <td><strong>${c.nome}</strong></td>
+      <td>${c.email||'—'}</td>
+      <td>${c.tel||'—'}</td>
+      <td>${c.cidade||'—'} ${c.uf?'/'+c.uf:''}</td>
+      <td><span class="badge-status badge-blue">${c.tipo||'—'}</span></td>
+      <td><span class="badge-status badge-green">${c.origem||'—'}</span></td>
+      <td><button class="btn-icon btn-del" onclick="deletarItem('clientes',${i})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></td>
+    </tr>`).join('');
+  }
+  if(tipo==='Empresas') {
+    const tbody = document.getElementById('tabelaEmpresas');
+    if(!tbody) return;
+    if(!empresas.length) { tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Nenhuma empresa cadastrada.</p></div></td></tr>`; return; }
+    tbody.innerHTML = empresas.map((e,i) => {
+      const sc = e.status==='Ativa'?'badge-green':e.status==='Inativa'?'badge-red':'badge-yellow';
+      return `<tr>
+        <td><strong>${e.nome}</strong></td>
+        <td>${e.fantasia||'—'}</td>
+        <td style="font-family:monospace;font-size:0.8rem">${e.cnpj||'—'}</td>
+        <td>${e.cidade||'—'} ${e.uf?'/'+e.uf:''}</td>
+        <td><span class="badge-status badge-blue">${e.segmento||'—'}</span></td>
+        <td><span class="badge-status ${sc}">${e.status}</span></td>
+        <td><button class="btn-icon btn-del" onclick="deletarItem('empresas',${i})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></td>
+      </tr>`;
+    }).join('');
+  }
+  if(tipo==='Usuarios') {
+    const tbody = document.getElementById('tabelaUsuarios');
+    if(!tbody) return;
+    if(!usuarios.length) { tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><p>Nenhum usuário cadastrado.</p></div></td></tr>`; return; }
+    const roleLabel = {vendedor:'Vendedor',estoque:'Estoque',financeiro:'Financeiro',admin_empresa:'Admin Empresa'};
+    tbody.innerHTML = usuarios.map((u,i) => {
+      const emp = empresas.find(e => e.id === u.empresaId);
+      return `<tr>
+        <td><strong>${u.nome}</strong></td>
+        <td style="font-family:monospace">${u.usuario}</td>
+        <td>${u.email||'—'}</td>
+        <td><span class="badge-status badge-purple">${roleLabel[u.role]||u.role}</span></td>
+        <td>${emp?emp.fantasia||emp.nome:'—'}</td>
+        <td><button class="btn-icon btn-del" onclick="deletarItem('usuarios',${i})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function filtrarProdutos() {
+  const q = document.getElementById('filtProd').value.toLowerCase();
+  const cat = document.getElementById('filtCategoriaProd').value;
+  const est = document.getElementById('filtEstoqueProd').value;
+  const r = produtos.filter(p => {
+    const match = p.nome.toLowerCase().includes(q) || p.codigo.toLowerCase().includes(q);
+    const catOk = !cat || p.categoria === cat;
+    const estOk = !est || p.estoque === est;
+    return match && catOk && estOk;
+  });
+  const tbody = document.getElementById('tabelaProdutos');
+  if(!tbody) return;
+  if(!r.length) { tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Nenhum produto encontrado.</p></div></td></tr>`; return; }
+  tbody.innerHTML = r.map((p) => {
+    const ec = p.estoque==='Em Estoque'?'badge-green':p.estoque==='Esgotado'?'badge-red':'badge-yellow';
+    const i = produtos.indexOf(p);
+    return `<tr>
+      <td><img src="${p.foto||'https://placehold.co/42x42/eef8f1/2d6a3e?text=✓'}" class="prod-img"/></td>
+      <td><strong>${p.nome}</strong></td>
+      <td style="font-family:monospace;font-size:0.8rem">${p.codigo}</td>
+      <td><span class="badge-status badge-blue">${p.categoria}</span></td>
+      <td style="font-weight:700;color:var(--g800)">R$ ${p.preco.toFixed(2)}</td>
+      <td><span class="badge-status ${ec}">${p.estoque}</span></td>
+      <td><button class="btn-icon btn-del" onclick="deletarItem('produtos',${i})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLIENTES
+// ═══════════════════════════════════════════════════════════════
+function salvarCliente() {
+  const nome = document.getElementById('cli_nome').value.trim();
+  if(!nome) return alert('Informe o nome do cliente.');
+  const cli = {
+    id: Date.now(), nome,
+    email: document.getElementById('cli_email').value,
+    tel:   document.getElementById('cli_tel').value,
+    doc:   document.getElementById('cli_doc').value,
+    cidade:document.getElementById('cli_cidade').value,
+    uf:    document.getElementById('cli_uf').value,
+    tipo:  document.getElementById('cli_tipo').value,
+    origem:document.getElementById('cli_origem').value,
+    empresa:document.getElementById('cli_empresa').value,
+    obs:   document.getElementById('cli_obs').value,
+    data:  new Date().toLocaleDateString('pt-BR')
+  };
+  clientes.unshift(cli);
+  localStorage.setItem('clientesAgroAir', JSON.stringify(clientes));
+  renderTabela('Clientes');
+  addActivity(`Cliente "${nome}" cadastrado`, 'orange');
+  alert('Cliente salvo com sucesso!');
+  limparForm('cli');
+}
+
+function filtrarClientes() {
+  const q = document.getElementById('filtCliente').value.toLowerCase();
+  const t = document.getElementById('filtTipoCliente').value;
+  const r = clientes.filter(c => {
+    const match = c.nome.toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.tel||'').includes(q);
+    return match && (!t || c.tipo===t);
+  });
+  const tbody = document.getElementById('tabelaClientes');
+  if(!r.length) { tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Nenhum cliente encontrado.</p></div></td></tr>`; return; }
+  tbody.innerHTML = r.map(c => {
+    const i = clientes.indexOf(c);
+    return `<tr>
+      <td><strong>${c.nome}</strong></td>
+      <td>${c.email||'—'}</td><td>${c.tel||'—'}</td>
+      <td>${c.cidade||'—'} ${c.uf?'/'+c.uf:''}</td>
+      <td><span class="badge-status badge-blue">${c.tipo||'—'}</span></td>
+      <td><span class="badge-status badge-green">${c.origem||'—'}</span></td>
+      <td><button class="btn-icon btn-del" onclick="deletarItem('clientes',${i})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EMPRESAS
+// ═══════════════════════════════════════════════════════════════
+function salvarEmpresa() {
+  const nome = document.getElementById('emp_nome').value.trim();
+  if(!nome) return alert('Informe a razão social.');
+  const emp = {
+    id: Date.now().toString(), nome,
+    fantasia: document.getElementById('emp_fantasia').value,
+    cnpj:     document.getElementById('emp_cnpj').value,
+    tel:      document.getElementById('emp_tel').value,
+    email:    document.getElementById('emp_email').value,
+    segmento: document.getElementById('emp_segmento').value,
+    cidade:   document.getElementById('emp_cidade').value,
+    uf:       document.getElementById('emp_uf').value,
+    status:   document.getElementById('emp_status').value,
+    endereco: document.getElementById('emp_endereco').value
+  };
+  empresas.unshift(emp);
+  localStorage.setItem('empresasAgroAir', JSON.stringify(empresas));
+  renderTabela('Empresas');
+  addActivity(`Empresa "${nome}" cadastrada`);
+  alert('Empresa salva com sucesso!');
+  limparForm('emp');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// USUÁRIOS
+// ═══════════════════════════════════════════════════════════════
+function carregarEmpresasSelect() {
+  const sel = document.getElementById('usr_empresa');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Selecione a empresa</option>';
+  empresas.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e.id;
+    opt.textContent = e.fantasia || e.nome;
+    sel.appendChild(opt);
+  });
+}
+
+function salvarUsuario() {
+  const nome    = document.getElementById('usr_nome').value.trim();
+  const usuario = document.getElementById('usr_usuario').value.trim();
+  const senha   = document.getElementById('usr_senha').value;
+  if(!nome || !usuario || !senha) return alert('Preencha nome, usuário e senha.');
+  if(usuario.toLowerCase() === 'admin') return alert('O nome "admin" é reservado.');
+  if(usuarios.find(u => u.usuario === usuario)) return alert('Este nome de usuário já existe.');
+  const usr = {
+    id: Date.now(), nome, usuario, senha,
+    email:    document.getElementById('usr_email').value,
+    role:     document.getElementById('usr_role').value,
+    empresaId:document.getElementById('usr_empresa').value
+  };
+  usuarios.unshift(usr);
+  localStorage.setItem('usuariosAgroAir', JSON.stringify(usuarios));
+  renderTabela('Usuarios');
+  addActivity(`Usuário "${usuario}" criado`);
+  alert('Usuário criado com sucesso!');
+  limparForm('usr');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITÁRIOS
+// ═══════════════════════════════════════════════════════════════
+function deletarItem(tipo, i) {
+  if(!confirm('Deseja remover este item?')) return;
+  const map = { produtos, clientes, empresas, usuarios };
+  const keyMap = { produtos:'produtosAgroAir', clientes:'clientesAgroAir', empresas:'empresasAgroAir', usuarios:'usuariosAgroAir' };
+  map[tipo].splice(i,1);
+  localStorage.setItem(keyMap[tipo], JSON.stringify(map[tipo]));
+  const tMap = { produtos:'Produtos', clientes:'Clientes', empresas:'Empresas', usuarios:'Usuarios' };
+  renderTabela(tMap[tipo]);
+  atualizarDashboard();
+}
+
+function limparForm(prefix) {
+  document.querySelectorAll(`[id^="${prefix}_"]`).forEach(el => {
+    if(el.tagName==='SELECT') el.selectedIndex=0;
+    else el.value='';
+  });
+}
+
+const toBase64 = file => new Promise((res,rej) => {
+  const r = new FileReader();
+  r.readAsDataURL(file);
+  r.onload = () => res(r.result);
+  r.onerror = e => rej(e);
+});
+
+// ═══════════════════════════════════════════════════════════════
+// INICIALIZAÇÃO
+// ═══════════════════════════════════════════════════════════════
+window.onload = () => {
+  initSession();
+  atualizarDashboard();
+  renderTabela('Produtos');
+};
+</script>
+</body>
+</html>
